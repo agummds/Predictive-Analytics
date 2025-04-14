@@ -27,7 +27,6 @@ Melalui analisis data status gizi balita, kita dapat memahami variabel apa saja 
 ### 💡 Solution Statement
 1. **Baseline Model**: Decision Tree Classifier
 2. **Alternatif Model**: Random Forest dan XGBoost Classifier
-3. **Improvement**: Hyperparameter tuning menggunakan GridSearchCV
 
 **Metrik Evaluasi:**
 - Accuracy
@@ -257,8 +256,8 @@ sns.heatmap(corr, annot=True, cmap='coolwarm')
 - **Random Forest** dipilih karena memberikan hasil akurasi terbaik dari ketiga model.
 
 
-Model terbaik adalah **XGBoost** dengan hasil evaluasi:
-- **Accuracy**: 99%
+Model terbaik adalah **Random Forest** dengan hasil evaluasi:
+- **Accuracy**: >99%
 - **Precision**: Tinggi
 - **Recall**: Konsisten
 - **F1-score**: Seimbang across classes
@@ -276,9 +275,9 @@ Proyek ini menggunakan dua metrik utama:
 
 | Model           | Accuracy |
 |----------------|----------|
-| Decision Tree  | 1.00     |
-| Random Forest  | 1.00     |
-| XGBoost        | 0.99     |
+| Decision Tree  | 0.999174     |
+| Random Forest  | 0.999215     |
+| XGBoost        |  0.990455    |
 
 Meskipun Decision Tree dan Random Forest memiliki akurasi sempurna, perlu diperhatikan kemungkinan overfitting, terutama bila diuji pada data baru.
 
