@@ -40,7 +40,10 @@ from sklearn.model_selection import GridSearchCV, RandomizedSearchCV, train_test
 from sklearn.preprocessing import LabelEncoder, OrdinalEncoder, OneHotEncoder, StandardScaler
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 
-"""# **Dataset**"""
+"""# **Dataset**
+
+**Tahap ini adalah mengambil dataset dari repository github. Saya meletakkan dataset di repository github agar mudah ketika dilakukan penjalanan ulang setiap cell pada notebook**
+"""
 
 url = 'https://raw.githubusercontent.com/agummds/Predictive-Analytics/master/Dataset/data_balita.csv'
 
@@ -49,7 +52,9 @@ df.head(20)
 
 df.tail()
 
-"""# **Exploratory Data Analysis (EDA)**
+"""**Dapat dilihat bahwa jumlah dataset terdiri dari 120998 data. Hal ini dapat dibilang cukup banyak untuk dilakukan pemrosesan data untuk predictive analytics**
+
+# **Exploratory Data Analysis (EDA)**
 
 ## a. Cek struktur dan informasi awal data
 """
@@ -57,20 +62,155 @@ df.tail()
 df.info()
 df.describe()
 
-"""## b. Distribusi Status Gizi"""
+"""**Dapat dilihat bahwa Jumlah total data: 120.999 baris dan 4 kolom. Semua kolom tidak memiliki nilai null, artinya data bersih dari missing values.**
+
+- 25% balita berumur ≤ 15 bulan dan tinggi ≤ 77 cm → menggambarkan fase awal pertumbuhan.
+
+- 50% balita (median) berumur 30 bulan dan tinggi 89.8 cm → representasi balita umum dalam dataset.
+
+- 75% balita berumur ≤ 45 bulan dan tinggi ≤ 101.2 cm.
+
+**Statistik Tinggi Badan (dalam cm)**
+- Rata-rata: 88.66 cm.
+- Rentang: dari 40 cm hingga 128 cm.
+- Nilai min (40 cm) kemungkinan adalah bayi baru lahir, dan max (128 cm) bisa jadi outlier jika dibandingkan dengan rata-rata tinggi balita umur 5 tahun (~110 cm).
+
+## b. Distribusi Status Gizi
+"""
 
 sns.countplot(data=df, x='Status Gizi')
 
-"""## c. Distribusi Umur dan Tinggi Badan"""
+"""**Insight dari Visualisasi**
+- Kategori Normal Mendominasi
+- Balita dengan status gizi normal mencapai sekitar 68.000 kasus. Ini berarti lebih dari setengah populasi memiliki kondisi gizi yang baik.
+Masalah Stunting Masih Signifikan
+- Gabungan kategori stunted dan severely stunted mencapai sekitar 30.000 kasus Sekitar 25% data menunjukkan masalah gizi kronis yang perlu perhatian khusus.
+Kategori Tinggi Juga Menonjol
+- Sekitar 20.000 balita masuk kategori tinggi, hampir sebanding dengan jumlah kasus stunting.
 
-sns.histplot(df['Umur (bulan)'], bins=20)
-sns.histplot(df['Tinggi Badan (cm)'], kde=True)
-
-"""## d. Cek rata-rata tinggi & umur per kategori status gizi."""
+## d. Cek rata-rata tinggi & umur per kategori status gizi.
+"""
 
 df.groupby('Status Gizi')[['Umur (bulan)', 'Tinggi Badan (cm)']].describe()
 
-"""## h.  Encode kolom kategorikal dan cek korelasi"""
+"""**Dari data di tabel dapat dilihat bahwa:**
+- Anak-anak dengan status "severely stunted" dan "stunted" cenderung lebih pendek dari usia sebayanya:
+- Rata-rata tinggi "severely stunted" adalah 73.18 cm, yang jauh lebih rendah dibandingkan "normal" (92.70 cm).
+
+**Ini menandakan masalah pertumbuhan kronis.**
+- Anak-anak dengan status "tinggi" memiliki tinggi rata-rata tertinggi (94.91 cm) meskipun usia mereka justru paling kecil (23.86 bulan):
+- Ini bisa menunjukkan bahwa anak-anak dengan pertumbuhan cepat cenderung sudah terlihat sejak dini.
+
+**Perbedaan umur dan tinggi badan:**
+- Meskipun stunted dan normal memiliki umur rata-rata hampir sama (32 bulan), tinggi badan mereka berbeda signifikan (10 cm selisih).
+
+# **Univariate Analysis**
+
+## 1. Umur (bulan) — numerik
+"""
+
+sns.histplot(df['Umur (bulan)'], bins=30, kde=True)
+plt.title('Distribusi Umur')
+
+"""**Insight dari Visualisasi**
+- Distribusi Umur Merata
+Mayoritas balita tersebar merata dalam rentang usia 0–59 bulan.
+Dataset cukup representatif terhadap semua kelompok umur.
+Lonjakan pada Usia 60 Bulan
+- Terdapat puncak jumlah data pada usia 60 bulan.
+Kemungkinan disebabkan pencatatan massal pada usia maksimum balita.
+Penurunan pada Usia 9–11 Bulan
+- Penurunan kecil pada rentang ini bisa menunjukkan ketidakseimbangan data atau bias dalam pengumpulan informasi.
+
+## 2. Tinggi Badan (cm) — numerik
+"""
+
+sns.boxplot(x=df['Tinggi Badan (cm)'])
+plt.title('Boxplot Tinggi Badan')
+
+"""**Insight dari Visualisasi**
+
+- Tinggi badan berkisar antara 40 cm hingga 130 cm. Mewakili rentang usia balita yang luas.
+- Median Tinggi Badan Sekitar 95–100 cm
+- Nilai tengah distribusi berada di kisaran tinggi anak usia 2–4 tahun.
+Outlier pada Nilai Rendah
+- Terdapat outlier sekitar 40 cm yang bisa mewakili bayi baru lahir atau potensi data error.
+- Distribusi Simetris
+- Tampilan boxplot menunjukkan distribusi tinggi badan yang relatif seimbang.
+
+## 3. Jenis Kelamin — kategorikal
+"""
+
+sns.countplot(x='Jenis Kelamin', data=df)
+plt.title('Distribusi Jenis Kelamin')
+
+"""**Distribusi Seimbang**
+
+- Balita laki-laki berjumlah sekitar 60.000.
+- Balita perempuan berjumlah sekitar 61.000.
+- Tidak ada ketimpangan besar antara keduanya.
+
+**Data Representatif**
+- Keseimbangan ini penting untuk menjaga fairness model dalam prediksi.
+- Tidak ada indikasi bias gender dalam distribusi data.
+
+# Multivariate Analysis EDA
+
+## 1. Umur vs Tinggi Badan (scatter plot)
+"""
+
+sns.scatterplot(data=df, x='Umur (bulan)', y='Tinggi Badan (cm)', hue='Status Gizi')
+plt.title('Umur vs Tinggi Badan per Status Gizi')
+
+"""**Dari gambar dapat dilihat bahwa:**
+- Tinggi Badan Meningkat Seiring Bertambahnya Umur. Semua kategori menunjukkan pola pertumbuhan yang positif sesuai usia balita.
+Pemisahan Status Gizi Jelas
+- Kategori seperti tinggi, normal, stunted, dan severely stunted membentuk pola sendiri-sendiri yang tidak saling tumpang tindih secara signifikan. Visual ini mendukung keandalan label untuk klasifikasi.
+
+**Tinggi vs Severely Stunted**
+Anak dengan status tinggi memiliki tinggi badan lebih dominan sepanjang usia.
+Severely stunted menunjukkan pertumbuhan yang paling rendah secara konsisten.
+Distribusi Konsisten hingga 60 Bulan. Tidak terlihat anomali atau stagnasi pada distribusi tinggi badan, yang menandakan dataset cukup baik.
+
+## 2. Jenis Kelamin vs Status Gizi (countplot with hue)
+"""
+
+sns.countplot(data=df, x='Jenis Kelamin', hue='Status Gizi')
+plt.title('Distribusi Status Gizi per Jenis Kelamin')
+
+"""**Insight dari Visualisasi**
+- Status Gizi Normal Mendominasi. Baik laki-laki maupun perempuan mayoritas masuk dalam kategori normal. Laki-laki sedikit lebih unggul dalam jumlah anak dengan gizi normal.
+- Distribusi Cenderung Seimbang. Semua kategori status gizi memiliki jumlah yang relatif seimbang antara jenis kelamin.
+Tidak ditemukan ketimpangan signifikan antara laki-laki dan perempuan.
+Kategori Tinggi Sedikit Lebih Banyak pada Perempuan
+- Anak perempuan sedikit lebih banyak berada dalam kategori tinggi dibanding laki-laki, meski perbedaannya tipis.
+
+## 3. Boxplot Tinggi Badan berdasarkan Status Gizi
+"""
+
+sns.boxplot(data=df, x='Status Gizi', y='Tinggi Badan (cm)')
+plt.title('Tinggi Badan per Kategori Status Gizi')
+
+"""**Tinggi Badan Berkorelasi dengan Status Gizi**
+
+- Anak dengan status gizi tinggi memiliki tinggi badan paling tinggi secara median maupun sebaran. Sebaliknya, anak dengan status severely stunted memiliki tinggi paling rendah.
+- Sebaran Tinggi Lebih Luas di Kategori Normal dan Tinggi. Menunjukkan variasi tinggi badan yang lebih besar pada anak-anak yang tergolong sehat atau sangat sehat.
+- Outlier di Setiap Kategori.
+Adanya nilai ekstrem (outlier) di semua kategori menunjukkan bahwa meskipun pola umum terlihat jelas, ada kasus khusus yang perlu diperhatikan lebih lanjut.
+
+## 4. Pairplot (semua kombinasi numerik)
+"""
+
+df_encoded = df.copy()
+df_encoded['Jenis Kelamin'] = LabelEncoder().fit_transform(df_encoded['Jenis Kelamin'])
+df_encoded['Status Gizi'] = LabelEncoder().fit_transform(df_encoded['Status Gizi'])
+
+sns.pairplot(df_encoded, hue='Status Gizi')
+
+"""# Data Preparation
+
+## Encode kolom kategorikal dan cek korelasi
+"""
 
 df_encoded = df.copy()
 le_gender = LabelEncoder()
@@ -88,51 +228,11 @@ sns.heatmap(corr, annot=True, cmap='coolwarm')
 plt.title("Correlation Matrix")
 plt.show()
 
-"""# **Univariate Analysis**
-
-## 1. Umur (bulan) — numerik
+"""**Dari gambar dapat dilihat bahwa:**
+- Korelasi tertinggi adalah antara Umur dan Tinggi Badan (0.84): Ini sangat logis karena pertumbuhan fisik (tinggi badan) memang berkaitan erat dengan usia.
+- Status Gizi punya korelasi lemah dengan semua fitur: Menandakan bahwa klasifikasi status gizi tidak linear terhadap umur maupun tinggi badan. Bisa jadi distribusinya non-linear atau kompleks, cocok digunakan model klasifikasi seperti Decision Tree, Random Forest, SVM, atau Neural Network.
+- Jenis kelamin hampir tidak berpengaruh ke status gizi secara statistik: Tapi tetap bisa dicoba dimasukkan ke model, karena bisa saja memiliki pengaruh secara tidak langsung.
 """
-
-sns.histplot(df['Umur (bulan)'], bins=30, kde=True)
-plt.title('Distribusi Umur')
-
-"""## 2. Tinggi Badan (cm) — numerik"""
-
-sns.boxplot(x=df['Tinggi Badan (cm)'])
-plt.title('Boxplot Tinggi Badan')
-
-"""## 3. Jenis Kelamin — kategorikal"""
-
-sns.countplot(x='Jenis Kelamin', data=df)
-plt.title('Distribusi Jenis Kelamin')
-
-"""# Multivariate Analysis EDA
-
-## 1. Umur vs Tinggi Badan (scatter plot)
-"""
-
-sns.scatterplot(data=df, x='Umur (bulan)', y='Tinggi Badan (cm)', hue='Status Gizi')
-plt.title('Umur vs Tinggi Badan per Status Gizi')
-
-"""## 2. Jenis Kelamin vs Status Gizi (countplot with hue)"""
-
-sns.countplot(data=df, x='Jenis Kelamin', hue='Status Gizi')
-plt.title('Distribusi Status Gizi per Jenis Kelamin')
-
-"""## 3. Boxplot Tinggi Badan berdasarkan Status Gizi"""
-
-sns.boxplot(data=df, x='Status Gizi', y='Tinggi Badan (cm)')
-plt.title('Tinggi Badan per Kategori Status Gizi')
-
-"""## 4. Pairplot (semua kombinasi numerik)"""
-
-df_encoded = df.copy()
-df_encoded['Jenis Kelamin'] = LabelEncoder().fit_transform(df_encoded['Jenis Kelamin'])
-df_encoded['Status Gizi'] = LabelEncoder().fit_transform(df_encoded['Status Gizi'])
-
-sns.pairplot(df_encoded, hue='Status Gizi')
-
-"""# Model Persiapan"""
 
 df_encoded.head()
 
@@ -150,6 +250,7 @@ X_train, X_test, y_train, y_test = train_test_split(
 """##  Model Training dan Evaluasi
 
 ## a. Decision Tree Classifier
+Decision Tree Classifier adalah salah satu algoritma machine learning untuk tugas klasifikasi yang bekerja dengan cara membagi data ke dalam cabang-cabang berdasarkan fitur-fitur tertentu hingga mencapai keputusan akhir (kelas)
 """
 
 # Create a LabelEncoder object
@@ -173,7 +274,22 @@ y_test_labels = le_status.inverse_transform(y_test)
 print("Decision Tree Classifier:")
 print(classification_report(y_test_labels, y_pred_dt))
 
-"""## b. Random Forest Classifier"""
+"""- Precision: Akurasi prediksi positif untuk tiap kelas. Misalnya, untuk kelas 0, dari semua yang diprediksi sebagai 0, semuanya benar.
+
+- Recall: Kemampuan model dalam menemukan semua contoh yang benar-benar termasuk dalam kelas tersebut.
+
+- F1-score: Rata-rata harmonik dari precision dan recall.
+
+- Support: Jumlah data aktual di setiap kelas.
+
+Model berhasil memprediksi semua data dengan sempurna (nilai semua metrik = 1.00).
+
+Tapi ini juga perlu diwaspadai karena hasil terlalu sempurna bisa jadi indikasi overfitting, apalagi jika diuji di data latih, bukan data uji/validasi.
+
+## b. Random Forest Classifier
+
+Random Forest Classifier adalah algoritma machine learning berbasis ensemble learning yang menggabungkan banyak Decision Tree untuk meningkatkan akurasi dan mengurangi overfitting.
+"""
 
 # Initialize Random Forest Classifier
 rf_model = RandomForestClassifier(random_state=42)
@@ -191,7 +307,15 @@ y_test_labels = le_status.inverse_transform(y_test)
 print("Random Forest Classifier:")
 print(classification_report(y_test_labels, y_pred_rf))
 
-"""## c. XGBoost Classifier"""
+"""- Performa model sangat sempurna pada data yang diuji (precision, recall, f1-score = 1.00).
+
+- Hasil ini menunjukkan tidak ada kesalahan klasifikasi sama sekali.
+
+- Tapi, seperti halnya hasil Decision Tree kamu sebelumnya, ini juga perlu dicurigai sebagai tanda overfitting, terutama jika evaluasi dilakukan pada data latih, bukan data uji/validasi.
+
+## c. XGBoost Classifier
+XGBoost (Extreme Gradient Boosting) adalah algoritma ensemble berbasis gradient boosting yang sangat cepat dan powerful, sering digunakan untuk kompetisi machine learning karena performanya yang sangat baik.
+"""
 
 # Create a LabelEncoder for the 'Status Gizi' column
 le_status = LabelEncoder()
@@ -217,13 +341,15 @@ y_pred_xgb = xgb_model.predict(X_test)
 print("XGBoost Classifier:")
 print(classification_report(y_test, y_pred_xgb))
 
-print("Prediksi Decision Tree:")
-print(np.unique(y_pred_dt, return_counts=True))
+"""- Performa sangat bagus dengan akurasi 99%.
 
-print("Prediksi Random Forest:")
-print(np.unique(y_pred_rf, return_counts=True))
+- Sedikit kesalahan mulai muncul dibandingkan Decision Tree dan Random Forest sebelumnya yang 100%.
 
-"""# Evaluasi Model: Penerapan Metrik Kinerja & Visualisasi Model
+- Namun hasil ini lebih realistis dan mengindikasikan model ini mungkin lebih generalizable (tidak overfit).
+
+- Nilai f1-score kelas 2 sedikit lebih rendah (0.97), mungkin karena data tersebut lebih sulit diklasifikasikan atau lebih sedikit jumlahnya.
+
+# Evaluasi Model: Penerapan Metrik Kinerja & Visualisasi Model
 
 ## Langkah 1: Evaluasi dengan Metrik Kinerja
 """
