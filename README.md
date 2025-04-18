@@ -40,7 +40,7 @@ Melalui analisis data status gizi balita, kita dapat memahami variabel apa saja 
 
 ### 📁 Dataset
 - **Sumber**: [Dataset Stunting Toddler (Balita) Detection](https://raw.githubusercontent.com/agummds/Predictive-Analytics/master/Dataset/data_balita.csv)
-- **Jumlah Data**: ±121.000 baris
+- **Jumlah Data**: 120999 baris
 - **Jumlah Fitur**: 4 kolom
 
 ### 🔍 Deskripsi Fitur
@@ -172,6 +172,7 @@ Melalui analisis data status gizi balita, kita dapat memahami variabel apa saja 
    - Adanya nilai ekstrem (outlier) di semua kategori menunjukkan bahwa meskipun pola umum terlihat jelas, ada kasus khusus yang perlu diperhatikan lebih lanjut.
 ---
 ## 🧹 Data Preparation
+**Semua kolom tidak memiliki nilai null, artinya data bersih dari missing values**
 
 **1. Load Dataset**
 ```
@@ -205,7 +206,7 @@ df_encoded['Status Gizi'] = le_status.fit_transform(df_encoded['Status Gizi'])
 **4. Duplikasi DataFrame**
 - `df_encoded = df.copy()` untuk menjaga versi asli tetap utuh.
 
-**5. Analisis Korelasi**
+**5. cek korelasi**
 
 ![Encode kolom kategorikal dan cek korelasi](https://drive.google.com/uc?export=view&id=1-6KPZt1qv7PX2bULatPf-a_KZvgpZa7G)
 ```
@@ -216,12 +217,88 @@ sns.heatmap(corr, annot=True, cmap='coolwarm')
 - Korelasi antar variabel dianalisis menggunakan heatmap.
 - Membantu memahami hubungan antar fitur, mendeteksi redundansi 
 ---
+**6. Split Dataset**
+```
+X = df[['Umur (bulan)', 'Jenis Kelamin', 'Tinggi Badan (cm)']]
+y = df['Status Gizi']
+```
+```
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42, stratify=y
+)
+```
 ## 🤖 Modeling
 
 ### 📌 Algoritma yang Digunakan
 - Decision Tree Classifier
 - Random Forest Classifier
 - XGBoost Classifier
+
+Dokumen ini menjelaskan cara kerja dari tiga algoritma klasifikasi yang digunakan dalam analisis status gizi balita, yaitu:
+
+1. Decision Tree Classifier
+2. Random Forest Classifier
+3. XGBoost Classifier
+
+---
+
+1. Decision Tree Classifier 🌳
+
+Cara Kerja:
+- Membuat struktur pohon keputusan berdasarkan fitur-fitur dalam data.
+- Setiap node dalam pohon merupakan kondisi pada suatu fitur, dan setiap cabang mewakili hasil dari kondisi tersebut.
+- Model terus membagi data ke dalam cabang hingga mencapai daun (leaf), yang menunjukkan kelas prediksi.
+- Proses pembagian (split) berdasarkan metrik seperti **Gini Impurity** atau **Entropy**.
+
+Kelebihan:
+- Mudah dipahami dan divisualisasikan.
+- Tidak memerlukan normalisasi data.
+- Bisa menangani data kategorikal dan numerik.
+
+Kekurangan:
+- Rentan terhadap **overfitting**, terutama jika pohon terlalu dalam atau kompleks.
+- Performa bisa buruk pada data yang belum pernah dilihat (unseen data).
+
+---
+
+2. Random Forest Classifier 🌲🌲
+
+Cara Kerja:
+- Merupakan metode **ensemble** yang menggabungkan banyak pohon keputusan (decision tree).
+- Setiap pohon dilatih dengan subset data yang dipilih secara acak (*bootstrap sampling*).
+- Untuk setiap split, hanya subset acak dari fitur yang digunakan.
+- Prediksi akhir diambil berdasarkan **mayoritas voting** dari seluruh pohon.
+
+Kelebihan:
+- Lebih akurat dan tahan terhadap overfitting dibanding decision tree tunggal.
+- Bisa menangani data besar dan kompleks.
+- Tidak sensitif terhadap noise.
+
+Kekurangan:
+- Kurang interpretatif dibanding Decision Tree.
+- Latih dan prediksi lebih lambat karena banyak pohon yang harus dibuat.
+
+---
+
+3. XGBoost Classifier ⚡
+
+Cara Kerja:
+- Menggunakan metode **Gradient Boosting**, di mana model dibangun secara bertahap (sekuensial).
+- Setiap pohon baru berusaha **memperbaiki kesalahan** dari prediksi model sebelumnya.
+- Menggunakan fungsi loss dan gradient untuk mengarahkan pembelajaran.
+- Dilengkapi dengan teknik **regularisasi (L1 & L2)** dan **pruning otomatis**, yang membuatnya sangat akurat dan efisien.
+
+Kelebihan:
+- Performa tinggi (akurat & cepat).
+- Mendukung penanganan nilai hilang otomatis.
+- Dilengkapi dengan banyak parameter untuk **tuning performa**.
+- Bisa mencegah overfitting dengan **early stopping** dan regularisasi.
+
+Kekurangan:
+- Lebih kompleks dan butuh pemahaman untuk tuning.
+- Konsumsi memori lebih tinggi dibanding model lain.
+
+---
 
 ### ⚙️ Tahapan dan Parameter Modeling
 - **Splitting Data**: 80% training, 20% testing
@@ -237,20 +314,6 @@ sns.heatmap(corr, annot=True, cmap='coolwarm')
 - Confusion Matrix
 - Classification Report (Precision, Recall, F1-score)
 - Bar chart perbandingan akurasi
-
-### ✅ Kelebihan dan Kekurangan
-
-#### Decision Tree
-- ✅ Cepat dan sederhana
-- ❌ Mudah overfitting
-
-#### Random Forest
-- ✅ Bagus untuk generalisasi
-- ❌ Waktu training lebih lama
-
-#### XGBoost
-- ✅ Akurasi tinggi, powerful
-- ❌ Komputasi kompleks
 
 ### 🏆 Model Terbaik
 - **Random Forest** dipilih karena memberikan hasil akurasi terbaik dari ketiga model.
