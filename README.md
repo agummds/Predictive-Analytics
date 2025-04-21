@@ -301,13 +301,16 @@ Kekurangan:
 ---
 
 ### ⚙️ Tahapan dan Parameter Modeling
-- **Splitting Data**: 80% training, 20% testing
-- **Preprocessing**:
-  - LabelEncoder untuk kolom 'Status Gizi' dan 'Jenis Kelamin'
 - **Model & Parameter**:
   - DecisionTreeClassifier(random_state=42)
   - RandomForestClassifier(random_state=42)
   - XGBClassifier(random_state=42)
+
+  ```random_state``` adalah parameter yang menentukan seed dari generator angka acak yang digunakan dalam algoritma. Tujuannya:
+- Menjamin bahwa hasil model selalu sama jika kode dijalankan ulang.
+- Berguna untuk keperluan debugging, pengujian, dan replikasi eksperimen.
+
+---
 
 ### 📊 Evaluasi Model
 - Accuracy
@@ -344,7 +347,7 @@ Proyek ini menggunakan dua metrik utama:
 
 Meskipun Decision Tree dan Random Forest memiliki akurasi sempurna, perlu diperhatikan kemungkinan overfitting, terutama bila diuji pada data baru.
 
-### 📌 Confusion Matrix
+### 📌 Keterangan Label pada Kelas
 
 Label kelas:
 - 0 = Normal
@@ -354,37 +357,22 @@ Label kelas:
 
 Model menunjukkan performa sangat baik dalam mengklasifikasikan keempat kelas. Kesalahan yang terjadi cenderung kecil dan mayoritas prediksi sesuai.
 
-### 🧠 Insight
+## 📌 Kesimpulan
 
-- Fitur yang digunakan sangat informatif.
-- Model menunjukkan kemampuan prediksi yang tinggi.
-- Tetap perlu evaluasi lebih lanjut dengan data unseen untuk memastikan generalisasi model.
+Berdasarkan hasil pemodelan dan evaluasi, dapat disimpulkan hal berikut:
 
-## ✅ Kesimpulan
+- 🔍 **Fitur paling berpengaruh** dalam klasifikasi status gizi balita adalah:
+  - **BB/U (Berat Badan menurut Umur)**: Menjadi indikator paling dominan karena langsung menggambarkan kekurangan berat badan akibat kekurangan energi secara umum.
+  - Diikuti oleh **TB/U** dan **BB/TB**, yang turut memberikan kontribusi signifikan dalam membedakan status gizi balita.
 
-Proyek ini telah berhasil mengembangkan model machine learning untuk memprediksi **status gizi balita** berdasarkan variabel-variabel seperti **umur**, **jenis kelamin**, dan **tinggi badan**. Hasil eksplorasi data, visualisasi, dan pemodelan menghasilkan beberapa kesimpulan penting:
+- 🧠 **Model terbaik** dalam eksperimen ini adalah **Random Forest**, dengan performa akurasi dan f1-score tertinggi dibandingkan model Decision Tree dan XGBoost . Random Forest mampu menangkap kompleksitas data dengan baik tanpa overfitting.
 
-### 📌 Faktor-faktor utama yang memengaruhi status gizi balita:
-- **Umur balita** — Berkorelasi dengan pertumbuhan tinggi badan secara alami.
-- **Tinggi badan** — Indikator utama dalam klasifikasi status gizi (`stunted`, `normal`, `tinggi`, dan `severely stunted`).
-- **Jenis kelamin** — Tidak terlalu signifikan, namun menunjukkan perbedaan kecil dalam distribusi status gizi.
+- ✅ **Klasifikasi berhasil dilakukan**, terbukti dari nilai evaluasi (precision, recall, f1-score) yang cukup baik.
 
-### 🤖 Model Machine Learning yang Dikembangkan:
-- **Decision Tree**
-- **Random Forest**
-- **XGBoost**
-
-### 🧪 Hasil Evaluasi:
-- **Decision Tree** dan **Random Forest** mencapai **akurasi 100%**
-- **XGBoost** mencapai **akurasi 99%**
-- **Random Forest** dipilih sebagai model terbaik berdasarkan:
-  - Akurasi tinggi dan stabil
-  - Kemampuan generalisasi
-  - Hasil confusion matrix yang menunjukkan klasifikasi yang sangat akurat
-
-Confusion matrix memperlihatkan bahwa **mayoritas status gizi berhasil diklasifikasikan dengan benar**, dan kesalahan klasifikasi sangat kecil. Ini menunjukkan bahwa model mampu **menangkap pola data dengan sangat baik**.
-
-Kesimpulannya, **machine learning dapat menjadi alat bantu skrining status gizi yang efektif**, khususnya bagi tenaga kesehatan yang membutuhkan sistem deteksi dini berbasis data sederhana.
+- 🌍 **Penerapan di dunia nyata sangat memungkinkan**, terutama untuk:
+  - Membantu tenaga kesehatan dalam skrining awal status gizi balita.
+  - Menyediakan sistem prediksi cepat berbasis input data antropometri sederhana.
+  - Menjadi bagian dari aplikasi monitoring gizi di posyandu atau puskesmas, sehingga intervensi bisa dilakukan lebih cepat dan tepat.
 
 ---
 
